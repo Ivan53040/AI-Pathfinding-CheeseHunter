@@ -1,131 +1,123 @@
-# Assignment 1 Support Code
+Search Assignment – Cheese Hunter
 
-This is the support code for COMP3702 Assignment 1 "Cheese Hunter", 2025.
+📌 About
 
-The following files are provided:
+This repository contains the support code and starter templates for Cheese Hunter. The project focuses on implementing search algorithms (such as UCS, A* etc.) to solve a grid‑based puzzle where an agent must find cheese while avoiding traps and leveraging levers.
 
-**game_env.py**
+The codebase includes utility modules for representing the environment and game state, starter solution files, test cases, and scripts to run and evaluate your solution. The included documentation explains the problem specification, design considerations, and expected behaviour.
 
-This file contains a class representing a Cheese Hunter level environment, storing the dimensions of the environment, initial player position, exit (cheese) position, lever positions, trap positions, mapping of levers to traps, targets for path cost, run time and number of nodes expanded, the tile type of each grid position, and a list of all available actions.
+📁 Repository Structure
 
-This file contains a number of functions which will be useful in developing your solver:
+Path	Description
+- game_env.py	Simulates the Cheese Hunter environment and transitions
+  
+- game_state.py	Encapsulates game state (agent position, lever/trap status)
+  
+- play_game.py	Script to run an interactive game session
 
-~~~~~
-__init__(filename)
-~~~~~
-Constructs a new instance based on the given input filename.
+- solution.py	Starter file for your search solution
 
+- tester.py	Test harness to evaluate your implementation
 
-~~~~~
-get_init_state()
-~~~~~
-Returns a GameState object (see below) representing the initial state of the level.
+- testcases/	Input files for testing solver correctness
 
+- gui.py	Optional graphical interface for play/testing
 
-~~~~~
-perform_action(state, action)
-~~~~~
-Simulates the outcome of performing the given 'action' starting from the given 'state', where 'action' is an element of GameEnv.ACTIONS and 'state' is a GameState object. Returns a tuple (success, next_state), where success is True (if the action is valid and does not collide) or False (if the action is invalid or collides), and next_state is a GameState
-object.
+- gui_assets/	Supporting assets for GUI display
 
+- control/	Control logic used by tests or GUI
 
-~~~~~
-is_solved(state)
-~~~~~
-Checks whether the given 'state' (a GameState object) is solved (i.e. all traps/levers are activated and player at exit). Returns True (solved) or False (not solved).
+- Report.pdf	Assignment report explaining design and approach
 
+- Spec.pdf	Official problem specification and requirements
 
-~~~~~
-render(state)
-~~~~~
-Prints a graphical representation of the given 'state' (a GameState object) to the terminal - you may find this useful for debugging.
+- README.md	(This file) project overview and instructions
 
+🛠 Getting Started
 
-**game_state.py**
+Running Your Solution
 
-This file contains a class representing a Cheese Hunter state, storing the position of the player and the status of all levers/traps in the level (1 for activated, 0 for unactivated).
+1. Clone the repository:
 
-~~~~~
-__init__(row, col, trap_status)
-~~~~~
-Constructs a new GameState instance, where row and column are integers between 0 and n_rows, n_cols respectively, and trap_status is a tuple of length n_traps, where each element is 1 or 0.
+git clone https://github.com/Ivan53040/Search.git
+cd Search
 
+2. Inspect test cases:
 
-**play_game.py**
+The testcases/ directory contains level definitions for evaluating your solution.
 
+3. Implement your solver:
 
-This file contains a script which launches an interactive game session when run. Becoming familiar with the game mechanics may be helpful in designing your solution.
+Write your search logic inside solution.py (e.g., implement UCS and A*).
 
-To start playing, try:
-`python play_game.py testcases/level_1.txt`
+4. Run the tester script:
 
-The script takes 1 command line argument:
-- input_filename, which must be a valid testcase file (e.g. one of the provided files in the testcases directory)
+python tester.py
 
-When prompted for an action, type one of the available action strings (e.g. wr, wl, etc) and press enter to perform the entered action (make sure the terminal and not the display window is selected when entering actions).
+This will run your implementation against provided test cases and report performance indicators.
 
+📖 Play the Game
 
-**solution.py**
+You can interactively play Cheese Hunter using the play_game.py script:
 
-Template file for you to implement your solution to Assignment 1.
+python play_game.py testcases/level_1.txt
 
-You should implement each of the method stubs contained in this file. You may add additional methods and/or classes to this file if you wish. You may also create additional source files and import to this file if you wish.
+Follow on‑screen prompts to move the agent manually or test your search outcomes.
 
-We recommend you implement UCS first, then attempt A* after your UCS implementation is working.
+🧠 Solver Template
 
+The file solution.py includes stubs for the search functions you need to implement. It’s designed so you can focus on algorithm logic (e.g., Uniform Cost Search, A*) while the supporting code handles environment transitions and state representation.
 
-**tester.py**
+📚 Documentation
 
-This file contains a script which can be used to debug and/or evaluate your solution.
+- Spec.pdf – Full problem description, input/level format, scoring rules.
 
-The script takes up to 3 command line arguments:
-- search_type, which should be "ucs" or "a_star"
-- testcase_filename, which must be a valid testcase file (e.g. one of the provided files in the testcases directory)
-- (optional) "-v" to enable visualisation of the resulting trajectory
+- Report.pdf – Your report summarising approach, design decisions, and test results.
 
+These files help assess correctness as well as design clarity.
 
-**testcases**
+🔹 Heuristic and A* Search
 
-A directory containing input files which can be used to evaluate your solution.
+For the A* implementation, a custom heuristic was designed to efficiently solve the CheeseHunter environment. Key points:
 
-The format of a testcase file is:
-~~~~~
-num_rows, num_cols
-cost targets (min score target, max score target)
-nodes targets (min score target, max score target)
-UCS run time targets (min score target, max score target)
-A* run time targets (min score target, max score target)
-grid_data (row 1)
-...
-grid_data (row num_rows)
-~~~~~
+1. Directed Movement Cost – Accounts for asymmetric action costs: walking, sprinting, climbing, and dropping all have different costs, so the heuristic reflects movement efficiency.
 
-Testcase files can contain comments, starting with '#', which are ignored by the input file parser.
+2. Lever–Goal Ordering via MST – Since all levers must be activated before reaching the goal, a Minimum Spanning Tree (MST) over remaining levers + goal provides a tight lower bound.
 
+3. Lever Activation Cost – Each lever requires a discrete activation action; this cost is included in the heuristic to avoid underestimation.
 
-### Lever-Trap System
+✅ Admissibility
 
-For levels containing levers (L) and traps (T for trapdoors, D for drawbridges), the game uses a **schematic-based mapping system**:
+The heuristic is admissible, meaning it never overestimates the true cost:
 
-**Level Format:**
-```
-# Standard level data as above
-grid_data (row 1)
-...
-grid_data (row num_rows)
-# Schematic
-schematic_row_1
-...
-schematic_row_num_rows
-```
+- Movement cost uses minimum per-cell cost, so cheaper options are always assumed available.
 
-- The schematic section uses numeric IDs (1, 2, 3, etc.) to connect levers to traps
-- Positions with the same ID number are connected - activating a lever toggles its paired trap
-- Example: If the schematic has '1' at position (2,5) and '1' at position (7,3), then the lever at (2,5) controls the trap at (7,3)
+- MST lower bound ensures the cost of visiting remaining levers + goal is underestimated rather than overestimated.
 
-Available Methods:
-- `env.get_lever_trap_id(row, col)` - Get the connection ID for a position (0 if not connected)
-- `env.get_related_positions(row, col)` - Get all positions connected to this one
-- `env.is_lever_trap_position(row, col)` - Check if position is part of lever-trap system
+- Activation cost counts exactly one action per lever.
 
-These methods can be useful for pathfinding algorithms to understand trap dependencies (perhaps).
+This combination reduces node expansions significantly compared to UCS, especially on large maps, while keeping runtime overhead manageable via precomputation and caching.
+
+📊 Testing
+
+The repository includes test scripts and cases to verify your implementation:
+
+- tester.py runs solver functions and prints metrics.
+
+- Additional test files are provided in testcases/.
+
+This helps ensure your algorithms satisfy all assignment criteria.
+
+📈 Learning Outcomes
+
+This assignment demonstrates:
+
+- Implementation of search strategies for AI problem solving
+
+- Handling of state spaces and transitions
+
+- Use of test automation for algorithm validation
+
+- Integration of logic with a game environment simulator
+
+It is a solid showcase of classical AI search methods in practice.
